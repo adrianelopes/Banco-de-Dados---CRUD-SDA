@@ -1,5 +1,17 @@
 # Banco-de-Dados---CRUD-SDA
 
+pip install flask
+
+Python 
+
+Flask (framework web bem leve e fácil)
+
+SQLite (banco de dados simples, já vem no Python)
+
+HTML + Bootstrap (para interface da página)
+
+
+
 Inserir → cadastra um novo quarto, cliente ou reserva.
 
 Alterar → muda preço, tipo ou nome.
