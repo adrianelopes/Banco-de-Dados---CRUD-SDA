@@ -1,5 +1,10 @@
 # Banco-de-Dados---CRUD-SDA
 
+
+Para rodar o docker:  docker-compose up -d
+Se já tiver outro PostgreSQL rodando na porta 5432 use: sudo systemctl stop postgresql 
+
+
 pip install flask
 
 Python 
@@ -9,7 +14,6 @@ Flask (framework web bem leve e fácil)
 SQLite (banco de dados simples, já vem no Python)
 
 HTML + Bootstrap (para interface da página)
-
 
 
 Inserir → cadastra um novo quarto, cliente ou reserva.
