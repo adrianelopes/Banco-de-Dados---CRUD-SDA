@@ -10,9 +10,10 @@ services:
       POSTGRES_PASSWORD: condado123
       POSTGRES_DB: ponesaltitante
     ports:
-      - "5432:5432"
+      - "5432:5432"  # ou 5433:5432 se tiver conflito com PostgreSQL local
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # <-- arquivo de inicialização
 
 volumes:
   postgres_data:
