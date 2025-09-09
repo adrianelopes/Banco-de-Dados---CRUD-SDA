@@ -2,6 +2,8 @@ from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from database import get_connection
+from database import create_tables
+create_tables()
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
