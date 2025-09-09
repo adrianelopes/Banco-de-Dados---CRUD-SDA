@@ -1,10 +1,13 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+import psycopg2
+import psycopg2.extras
 
-DATABASE_URL = "postgresql://adriane:al123dri4@localhost/crud_bd"
-
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-Base = declarative_base()
+# Configuração da conexão
+def get_connection():
+    conn = psycopg2.connect(
+        dbname="crud_db",
+        user="myuser",
+        password="mypassword",
+        host="localhost",
+        port="5432"
+    )
+    return conn
