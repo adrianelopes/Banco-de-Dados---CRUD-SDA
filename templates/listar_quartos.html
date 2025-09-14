@@ -15,7 +15,6 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
 .card-title { color: #4b2200; font-weight: bold; }
 .ring { font-size: 2rem; color: goldenrod; }
 </style>
-<!-- ícones bootstrap -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
@@ -25,9 +24,14 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
     </div>
 </nav>
 
-<div class="container mt-5">
+<div class="container mt-4">
+    <form method="get" action="/quartos" class="mb-3 d-flex">
+        <input type="text" name="q" placeholder="Pesquisar por código, tipo ou valor" value="{{ q }}" class="form-control me-2">
+        <button type="submit" class="btn btn-medieval">Pesquisar</button>
+    </form>
     <h1 class="mb-4">Lista de Quartos</h1>
     <div class="row">
+
         {% for quarto in quartos %}
         <div class="col-md-4 mb-4">
             <div class="card p-3">

@@ -3,14 +3,31 @@ import psycopg2
 import psycopg2.extras
 
 # Buscar todos os quartos
-def get_quartos():
+def get_quartos(filtro: str = ""):
     conn = get_connection()
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT * FROM quartos ORDER BY id;")
+    if filtro:
+        filtro = f"%{filtro}%"
+        cur.execute("""
+            SELECT * FROM quartos 
+            WHERE codigo ILIKE %s OR tipo ILIKE %s OR CAST(preco_diaria AS TEXT) ILIKE %s
+            ORDER BY id;
+        """, (filtro, filtro, filtro))
+    else:
+         cur.execute("SELECT * FROM quartos ORDER BY id;")
     quartos = cur.fetchall()
     cur.close()
     conn.close()
     return quartos
+
+def get_quarto_by_id(quarto_id: int):
+    conn = get_connection()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("SELECT * FROM quartos WHERE id=%s", (quarto_id,))
+    quarto = cur.fetchone()
+    cur.close()
+    conn.close()
+    return quarto
 
 # Inserir novo quarto
 def add_quarto(codigo: str, tipo: str, preco_diaria: float, ocupado: bool = False):
@@ -73,3 +90,5 @@ def reservar_quarto(quarto_id: int, checkin: str, checkout: str, servicos: str):
     conn.commit()
     cur.close()
     conn.close()
+    
+    
