@@ -76,6 +76,27 @@ def reservar_quarto(quarto_id: int):
     conn.close()
     return updated > 0
 
+def get_resumo_quartos():
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM quartos;")
+    total = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM quartos WHERE ocupado = FALSE;")
+    livres = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM quartos WHERE ocupado = TRUE;")
+    ocupados = cur.fetchone()[0]
+
+    cur.close()
+    conn.close()
+
+    return {
+        "total_quartos": total,
+        "quartos_livres": livres,
+        "quartos_ocupados": ocupados
+    }
+
 def reservar_quarto(quarto_id: int, checkin: str, checkout: str, servicos: str):
     conn = get_connection()
     cur = conn.cursor()

@@ -14,6 +14,34 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
 .card { border: 2px solid #7b3f00; border-radius: 12px; background-color: #fff8f0; }
 .card-title { color: #4b2200; font-weight: bold; }
 .ring { font-size: 2rem; color: goldenrod; }
+/* Barra lateral fixa */
+.sidebar {
+    position: fixed;
+    top: 69px;        
+    right: 0;             /* fixada à direita */
+    width: 200px;          /* largura estreita */
+    height: 100vh;         /* altura da tela */
+    background-color: #fff8f0;
+    border-right: 2px solid #5a2e00;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    overflow-y: auto;
+}
+
+.sidebar h5 {
+    color: #4b2200;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.sidebar table td {
+    padding: 5px 10px;
+}
+
+.main-content {
+    margin-left: 220px; /* espaço para a barra lateral */
+    padding: 20px;
+}
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
@@ -25,6 +53,26 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
 </nav>
 
 <div class="container mt-4">
+
+  
+<div class="sidebar">
+   <h5>Resumo de Quartos</h5>
+    <table class="table table-borderless">
+        <tr>
+            <td>Total:</td>
+            <td>{{ total_quartos }}</td>
+        </tr>
+        <tr>
+            <td>Livres:</td>
+            <td>{{ quartos_livres }}</td>
+        </tr>
+        <tr>
+            <td>Ocupados:</td>
+            <td>{{ quartos_ocupados }}</td>
+        </tr>
+    </table>
+</div>
+
     <form method="get" action="/quartos" class="mb-3 d-flex">
         <input type="text" name="q" placeholder="Pesquisar por código, tipo ou valor" value="{{ q }}" class="form-control me-2">
         <button type="submit" class="btn btn-medieval">Pesquisar</button>

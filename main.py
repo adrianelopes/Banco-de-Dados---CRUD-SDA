@@ -25,8 +25,17 @@ def home(request: Request):
 @app.get("/quartos", response_class=HTMLResponse)
 def listar_quartos(request: Request, q: str = ""):
     quartos = queries.get_quartos(q)
-    return templates.TemplateResponse("listar_quartos.html", {"request": request, "quartos": quartos, "q": q})
-
+    resumo = queries.get_resumo_quartos() 
+    return templates.TemplateResponse(
+        "listar_quartos.html",
+        {
+            "request": request,
+            "quartos": quartos,
+            "q": q,
+            **resumo 
+        }
+    )
+   
 # Página de adicionar
 @app.get("/add", response_class=HTMLResponse)
 def add_page(request: Request):
@@ -57,8 +66,7 @@ def reservar_page(id: int, request: Request):
     if not quarto:
         return HTMLResponse(f"<h1>Quarto {id} não encontrado</h1>", status_code=404)
 
-    # A imagem é escolhida pelo tipo do quarto
-    quarto_tipo = quarto['tipo'] or "anao"  # default "anao" se não houver tipo
+    quarto_tipo = quarto['tipo'] or "anao"  
     foto_url = f"/static/imagens/{quarto_tipo.lower()}.png"
 
     return templates.TemplateResponse(
