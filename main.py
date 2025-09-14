@@ -71,7 +71,7 @@ def reservar_post(
    id: int,
     checkin: str = Form(...),
     checkout: str = Form(...),
-    servicos: str = Form(...)
+    servicos: str = Form("")
 ):
     queries.reservar_quarto(id, checkin, checkout, servicos)
     return RedirectResponse("/quartos", status_code=303)
