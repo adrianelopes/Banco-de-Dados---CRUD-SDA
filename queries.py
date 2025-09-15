@@ -1,6 +1,6 @@
 from database import get_connection
 import psycopg2.extras
-from quarto import Quarto   # supondo que você crie um arquivo models.py
+from quarto import Quarto  
 
 class QuartoManager:
     def __init__(self, conn_factory=get_connection):

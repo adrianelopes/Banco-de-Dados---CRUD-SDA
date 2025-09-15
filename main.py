@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse, RedirectResponse, RedirectResponse, JSONResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, RedirectResponse, JSONResponse, FileResponse 
 from fastapi.templating import Jinja2Templates
 import queries
 from fastapi import Request
@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from database import get_connection
 from database import create_tables
 from queries import QuartoManager
+import csv
 create_tables()
 
 
@@ -92,6 +93,23 @@ def liberar_quarto(id: int):
         manager.update(quarto)
     return RedirectResponse("/quartos", status_code=303)
 
+@app.get("/relatorio/download")
+def download_relatorio():
+    dados = manager.get_relatorio_quartos()
+    filename = "relatorio.csv"
+
+    with open(filename, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f, delimiter=";")
+        writer.writerow(["Métrica", "Valor"])
+        writer.writerow(["Total de Quartos", dados["total_quartos"]])
+        writer.writerow(["Quartos Livres", dados["quartos_livres"]])
+        writer.writerow(["Quartos Ocupados", dados["quartos_ocupados"]])
+        writer.writerow(["Valor Total em Reservas", f"R$ {dados['valor_total_reservas']}"])
+        writer.writerow(["Valor Médio da Diária", f"R$ {round(dados['valor_medio_diaria'], 2)}"])
+
+    return FileResponse(path=filename, filename=filename, media_type="text/csv")
+
+
 @app.get("/relatorio", response_class=HTMLResponse)
 def relatorio(request: Request):
     dados = manager.get_relatorio_quartos()
@@ -105,4 +123,17 @@ def detalhes_quarto(id: int, request: Request):
     quarto = manager.get_quarto(id)
     if not quarto:
         return HTMLResponse("Quarto não encontrado", status_code=404)
-    return templates.TemplateResponse("quarto_detalhes.html", {"request": request, "quarto": quarto})
+    # quarto[2] é o tipo (ex: "elfo", "anao", "hobbit")
+    quarto_tipo = quarto[2] or "anao"
+    foto_url = f"/static/imagens/{quarto_tipo.lower()}.png"
+
+    return templates.TemplateResponse(
+        "quarto_detalhes.html",
+        {
+            "request": request,
+            "quarto": quarto,
+            "quarto_tipo": quarto_tipo,
+            "foto_url": foto_url
+        }
+    )
+
