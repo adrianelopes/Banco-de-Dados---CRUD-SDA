@@ -12,3 +12,5 @@ docker-compose down -v
 docker-compose up -d 
 
 Rodar a aplicação: uvicorn main:app --reload
+
+SELECT* FROM quartos

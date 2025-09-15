@@ -13,6 +13,30 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
 .btn-medieval:hover { background-color: #5a2e00; color: #fff8f0; }
 input, textarea { margin: 5px 0; padding: 5px; width: 100%; }
 h1 { color: #4b2200; }
+.reserva-container {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    margin-top: 30px;
+}
+
+/* Moldura medieval para a imagem */
+.quarto-imagem img {
+    border: 12px solid #5a2e00;
+    padding: 5px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    max-width: 350px;
+    object-fit: cover;
+}
+input, textarea {
+    margin: 5px 0;
+    padding: 5px;
+    width: 100%;
+    border: 2px solid #7b3f00;
+    border-radius: 5px;
+    background-color: #fff8f0;
+}
 </style>
 </head>
 <body>
@@ -22,22 +46,34 @@ h1 { color: #4b2200; }
     </div>
 </nav>
 
-<div class="container mt-5">
-    <h1>Reservar Quarto {{ quarto_id }}</h1>
-    <form method="post" action="/reservar/{{ quarto_id }}">
-        <label>Check-in:</label>
-        <input type="date" name="checkin" required>
-        <label>Check-out:</label>
-        <input type="date" name="checkout" required>
-        <label>Serviços:</label>
-        <textarea name="servicos" placeholder="Ex: Café, Roupa de cama..." rows="3"></textarea>
-        <button type="submit" class="btn btn-medieval mt-2">Confirmar Reserva</button>
-    </form>
-    <div class="mt-3">
-        <a href="/quartos" class="btn btn-medieval">Voltar</a>
+<div class="container reserva-container">
+    <!-- Imagem do quarto -->
+    <div class="quarto-imagem">
+        <img src="{{ foto_url }}" alt="Foto do quarto {{ quarto_tipo }}">
+    </div>
+
+    <div class="quarto-info flex-grow-1">
+        <h1>Reservar Quarto {{ quarto_id }}</h1>
+        <form method="post" action="/reservar/{{ quarto_id }}">
+            <label>Check-in:</label>
+            <input type="date" name="checkin" required>
+            
+            <label>Check-out:</label>
+            <input type="date" name="checkout" required>
+            
+            <label>Serviços:</label>
+            <textarea name="servicos" placeholder="Ex: Café, Roupa de cama..." rows="3"></textarea>
+            
+            <button type="submit" class="btn btn-medieval mt-2">Confirmar Reserva</button>
+        </form>
+        <div class="mt-3">
+            <a href="/quartos" class="btn btn-medieval">Voltar</a>
+        </div>
     </div>
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
