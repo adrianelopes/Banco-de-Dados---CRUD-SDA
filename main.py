@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from database import get_connection
 from database import create_tables
 from queries import QuartoManager
+from quarto import Quarto
 import csv
 create_tables()
 
@@ -52,10 +53,10 @@ def delete_quarto(id: int):
     return RedirectResponse("/quartos", status_code=303)
 
 # Atualizar quarto
-@app.post("/update/{id}")
-def update(id: int, codigo: str = Form(...), tipo: str = Form(...), preco_diaria: float = Form(...), ocupado: str = Form(...)):
-    manager.update(id, codigo, tipo, preco_diaria, ocupado.lower() == "sim")
-    return RedirectResponse("/quartos", status_code=303)
+# @app.post("/update/{id}")
+# def update(id: int, codigo: str = Form(...), tipo: str = Form(...), preco_diaria: float = Form(...), ocupado: str = Form(...)):
+#     manager.update(id, codigo, tipo, preco_diaria, ocupado.lower() == "sim")
+#     return RedirectResponse("/quartos", status_code=303)
 
 # Reservar quarto
 @app.get("/reservar/{id}", response_class=HTMLResponse)
@@ -137,3 +138,34 @@ def detalhes_quarto(id: int, request: Request):
         }
     )
 
+# Página de edição de quarto
+@app.get("/editar/{id}", response_class=HTMLResponse)
+def editar_page(id: int, request: Request):
+    quarto = manager.get_by_id(id)
+    if not quarto:
+        return HTMLResponse(f"<h1>Quarto {id} não encontrado</h1>", status_code=404)
+
+    return templates.TemplateResponse(
+        "editar_quarto.html",
+        {"request": request, "quarto": quarto}
+    )
+
+# Atualizar quarto
+@app.post("/editar/{id}")
+def editar_quarto(
+    id: int,
+    codigo: str = Form(...),
+    tipo: str = Form(...),
+    preco_diaria: float = Form(...),
+    ocupado: str = Form(...)
+):
+    quarto = Quarto(
+        id=id,
+        codigo=codigo,
+        tipo=tipo,
+        preco_diaria=preco_diaria,
+        ocupado=True if ocupado.lower() == "sim" else False
+    )
+
+    manager.update(quarto)
+    return RedirectResponse("/quartos", status_code=303)
