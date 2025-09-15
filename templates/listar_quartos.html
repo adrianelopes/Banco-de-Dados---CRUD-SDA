@@ -11,7 +11,7 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
 .navbar-brand { font-size: 1.8rem; color: #f4e9dc !important; }
 .btn-medieval { background-color: #7b3f00; color: #f4e9dc; border: 1px solid #5a2e00; }
 .btn-medieval:hover { background-color: #5a2e00; color: #fff8f0; }
-.card { border: 2px solid #7b3f00; border-radius: 12px; background-color: #fff8f0; }
+.card {position: relative; z-index: 1; border: 2px solid #7b3f00; border-radius: 12px; background-color: #fff8f0; }
 .card-title { color: #4b2200; font-weight: bold; }
 .ring { font-size: 2rem; color: goldenrod; }
 /* Barra lateral fixa */
@@ -20,12 +20,13 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
     top: 69px;        
     right: 0;             /* fixada à direita */
     width: 200px;          /* largura estreita */
-    height: 100vh;         /* altura da tela */
+    height: calc(100vh - 69px);         /* altura da tela */
     background-color: #fff8f0;
-    border-right: 2px solid #5a2e00;
+    border-left: 2px solid #5a2e00;
     padding: 20px;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
     overflow-y: auto;
+    z-index: 2000;
 }
 
 .sidebar h5 {
@@ -42,6 +43,18 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
     margin-left: 220px; /* espaço para a barra lateral */
     padding: 20px;
 }
+</style>
+<style>
+  /* Ícone de detalhes do quarto */
+  .detalhes-icon {
+      color: #7b3f00;       /* marrom escuro, igual botão */
+      font-size: 1.5rem;    /* tamanho adequado */
+      transition: color 0.2s;
+  }
+  .detalhes-icon:hover {
+      color: #5a2e00;       /* hover mais escuro */
+      text-decoration: none; /* tira underline se for link */
+  }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
@@ -83,13 +96,21 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
         {% for quarto in quartos %}
         <div class="col-md-4 mb-4">
             <div class="card p-3">
+
+                <!-- Ícone de detalhes no canto superior direito -->
+                <a href="/quarto/{{ quarto.id }}" 
+                   class="position-absolute top-0 end-0 m-2 detalhes-icon" 
+                   title="Ver detalhes">
+                  <i class="bi bi-exclamation-circle-fill"></i>
+                </a>
+
                 <div class="card-body text-center">
-                    <h5 class="card-title">Quarto {{ quarto[1] }}</h5>
-                    <p class="card-text">Tipo: {{ quarto[2] }}</p>
-                    <p class="card-text">Preço: R$ {{ quarto[3] }}</p>
+                    <h5 class="card-title">Quarto {{ quarto.codigo }}</h5>
+                    <p class="card-text">Tipo: {{ quarto.tipo }}</p>
+                    <p class="card-text">Preço: R$ {{ quarto.preco_diaria }}</p>
                     <p class="card-text">
                         Disponibilidade: 
-                        {% if quarto[4] %}
+                        {% if quarto.ocupado %}
                             <span class="text-danger">Ocupado</span>
                         {% else %}
                             <span class="text-success">Livre</span>
@@ -97,18 +118,16 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
                     </p>
 
                     <div class="d-flex justify-content-center gap-2">
-                        {% if not quarto[4] %}
-                            <!-- botão reservar -->
-                            <a href="/reservar/{{ quarto[0] }}" class="btn btn-medieval btn-sm">Reservar</a>
+                        {% if not quarto.ocupado %}
+                            <a href="/reservar/{{ quarto.id }}" class="btn btn-medieval btn-sm">Reservar</a>
                         {% else %}
+                            <a href="/liberar/{{ quarto.id }}" class="btn btn-success btn-sm">Liberar</a>
                             <div class="ring">
                                 <i class="bi bi-ring"></i>
                             </div>
                         {% endif %}
 
-                        <!-- botão deletar -->
-                        <a href="/delete/{{ quarto[0] }}" 
-                           class="btn btn-danger btn-sm"
+                        <a href="/delete/{{ quarto.id }}" class="btn btn-danger btn-sm"
                            onclick="return confirm('Tem certeza que deseja excluir este quarto?');">
                             Deletar
                         </a>
