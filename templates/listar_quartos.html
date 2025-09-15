@@ -141,6 +141,12 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
                   <i class="bi bi-exclamation-circle-fill"></i>
                 </a>
 
+                <a href="/editar/{{ quarto.id }}" 
+                       class="position-absolute top-0 start-0 m-2 btn btn-medieval btn-sm" 
+                       title="Editar quarto">
+                       <i class="bi bi-pencil"></i>
+                    </a>
+
                 <div class="card-body text-center">
                     <h5 class="card-title">Quarto {{ quarto.codigo }}</h5>
                     <p class="card-text">Tipo: {{ quarto.tipo }}</p>
