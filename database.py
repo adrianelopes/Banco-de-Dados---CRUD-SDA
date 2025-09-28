@@ -13,6 +13,16 @@ def get_connection():
 def create_tables():
     conn = get_connection()
     cur = conn.cursor()
+    
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS vendedor (
+        id_vendedor SERIAL PRIMARY KEY,
+        login VARCHAR(100) NOT NULL UNIQUE,
+        senha_hash VARCHAR(200) NOT NULL,
+        nome VARCHAR(200) NOT NULL
+    );
+    """)
+        
     cur.execute("""
     CREATE TABLE IF NOT EXISTS quartos (
         id SERIAL PRIMARY KEY,
@@ -22,7 +32,7 @@ def create_tables():
         ocupado BOOLEAN DEFAULT FALSE,
         servicos TEXT,
         checkin DATE,
-        checkout DATE
+        checkout DATE,
         vendedor_id INT,
         CONSTRAINT fk_vendedor_quarto FOREIGN KEY (vendedor_id) REFERENCES vendedor(id_vendedor) ON DELETE SET NULL
     );
@@ -33,15 +43,6 @@ def create_tables():
         login_cliente VARCHAR(100) NOT NULL UNIQUE,
         nome_cliente VARCHAR(200) NOT NULL,
         senha_hash VARCHAR(200) NOT NULL
-    );
-    """)
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS vendedor (
-        id_vendedor SERIAL PRIMARY KEY,
-        login VARCHAR(100) NOT NULL UNIQUE,
-        senha_hash VARCHAR(200) NOT NULL,
-        nome VARCHAR(200) NOT NULL
     );
     """)
     

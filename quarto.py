@@ -1,17 +1,39 @@
+from typing import Optional, Any
+from datetime import date
+
 class Quarto:
-    def __init__(self, id: int, codigo: str, tipo: str, preco_diaria: float,
-                 ocupado: bool = False, checkin: str = None,
-                 checkout: str = None, servicos: str = None):
+    def __init__(
+        self,
+        id: Optional[int] = None,
+        codigo: Optional[str] = "",
+        tipo: Optional[str] = "",
+        preco_diaria: Optional[Any] = 0.0,  # aceita Decimal ou float ou str
+        ocupado: bool = False,
+        checkin: Optional[str] = None,
+        checkout: Optional[str] = None,
+        servicos: Optional[str] = None,
+        vendedor_id: Optional[int] = None
+    ):
         self.id = id
         self.codigo = codigo
         self.tipo = tipo
-        self.preco_diaria = preco_diaria
-        self.ocupado = ocupado
+
+        
+        try:
+            if preco_diaria is None:
+                self.preco_diaria = 0.0
+            else:
+                self.preco_diaria = float(preco_diaria)
+        except (TypeError, ValueError):
+            self.preco_diaria = 0.0
+
+        self.ocupado = bool(ocupado)
         self.checkin = checkin
         self.checkout = checkout
         self.servicos = servicos
+        self.vendedor_id = vendedor_id
 
-    def reservar(self, checkin: str, checkout: str, servicos: str):
+    def reservar(self, checkin: str, checkout: str, servicos: str = ""):
         self.ocupado = True
         self.checkin = checkin
         self.checkout = checkout
@@ -24,12 +46,5 @@ class Quarto:
         self.servicos = None
 
     def __repr__(self):
-        return f"<Quarto {self.codigo} - {self.tipo} - {'Ocupado' if self.ocupado else 'Livre'}>"
-
-    def get_quarto(self, quarto_id):
-        conn = sqlite3.connect("banco.db")
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM quartos WHERE id = ?", (quarto_id,))
-        quarto = cursor.fetchone()
-        conn.close()
-        return quarto
+        status = "Ocupado" if self.ocupado else "Livre"
+        return f"<Quarto id={self.id} codigo={self.codigo} tipo={self.tipo} preco={self.preco_diaria} {status} vendedor_id={self.vendedor_id}>"

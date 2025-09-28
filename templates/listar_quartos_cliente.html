@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Quartos - Pônei Saltitante</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
+.navbar { background-color: #7b3f00; }
+.navbar-brand { font-size: 1.8rem; color: #f4e9dc !important; }
+.btn-medieval { background-color: #7b3f00; color: #f4e9dc; border: 1px solid #5a2e00; }
+.btn-medieval:hover { background-color: #5a2e00; color: #fff8f0; }
+.card {border: 2px solid #7b3f00; border-radius: 12px; background-color: #fff8f0; }
+.card-title { color: #4b2200; font-weight: bold; }
+.ring { font-size: 2rem; color: goldenrod; }
+.detalhes-icon { color: #7b3f00; font-size: 1.5rem; transition: color 0.2s; }
+.detalhes-icon:hover { color: #5a2e00; text-decoration: none; }
+.main-content { padding: 20px; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/home_cliente">Pônei Saltitante</a>
+    </div>
+</nav>
+
+<div class="container mt-4 main-content">
+
+    <!-- Barra de pesquisa -->
+    <form method="get" action="/listar_quartos_cliente" class="mb-3 d-flex justify-content-center">
+        <input type="text" name="q" placeholder="Pesquisar por código, tipo ou valor" value="{{ q }}" class="form-control me-2" style="max-width: 400px;">
+        <button type="submit" class="btn btn-medieval">Pesquisar</button>
+    </form>
+
+    <h1 class="mb-4 text-center">Quartos Disponíveis</h1>
+    <div class="row">
+        {% for quarto in quartos %}
+        <div class="col-md-4 mb-4">
+            <div class="card p-3 text-center position-relative">
+                <h5 class="card-title">Quarto {{ quarto.codigo }}</h5>
+                <p class="card-text">Tipo: {{ quarto.tipo }}</p>
+                <p class="card-text">Preço: R$ {{ quarto.preco_diaria }}</p>
+                <p class="card-text">
+                    Disponibilidade: 
+                    {% if quarto.ocupado %}
+                        <span class="text-danger">Ocupado</span>
+                    {% else %}
+                        <span class="text-success">Livre</span>
+                    {% endif %}
+                </p>
+                {% if not quarto.ocupado %}
+                    <a href="/reservar/{{ quarto.id }}" class="btn btn-medieval btn-sm">Reservar</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-3 text-center">
+        <a href="/home_cliente" class="btn btn-medieval">Voltar</a>

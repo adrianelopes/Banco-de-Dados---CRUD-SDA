@@ -67,7 +67,11 @@ input, textarea {
             <button type="submit" class="btn btn-medieval mt-2">Confirmar Reserva</button>
         </form>
         <div class="mt-3">
-            <a href="/quartos" class="btn btn-medieval">Voltar</a>
+            {% if request.cookies.get('user_type') == 'vendedor' %}
+                <a href="/quartos" class="btn btn-medieval">Voltar</a>
+            {% else %}
+                <a href="/listar_quartos_cliente" class="btn btn-medieval">Voltar</a>
+            {% endif %}
         </div>
     </div>
 </div>

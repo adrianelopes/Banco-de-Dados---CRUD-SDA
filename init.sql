@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS quartos (
     ocupado BOOLEAN DEFAULT FALSE,
     servicos TEXT,
     checkin DATE,
-    checkout DATE
+    checkout DATE,
     vendedor_id INT NOT NULL,
     CONSTRAINT fk_vendedor_quarto FOREIGN KEY (vendedor_id) REFERENCES vendedor(id_vendedor) ON DELETE SET NULL
 );
