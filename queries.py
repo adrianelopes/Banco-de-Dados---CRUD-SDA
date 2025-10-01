@@ -1,7 +1,8 @@
 from database import get_connection
 import psycopg2.extras
-from quarto import Quarto  
+from quarto import Quarto
 from datetime import date
+
 
 def autenticar(email, senha):
     conn = get_connection()
@@ -27,6 +28,7 @@ def autenticar(email, senha):
     conn.close()
     return None
 
+
 def criar_conta(nome: str, email: str, senha: str):
     try:
         conn = get_connection()
@@ -42,6 +44,7 @@ def criar_conta(nome: str, email: str, senha: str):
         return True, None, cliente_id
     except Exception as e:
         return False, str(e), None
+
 
 def criar_conta_vendedor(nome: str, email: str, senha: str):
     try:
@@ -112,9 +115,9 @@ class QuartoManager:
         cur = conn.cursor()
         cur.execute("""
             UPDATE quartos 
-            SET codigo=%s, tipo=%s, preco_diaria=%s, servicos=%s, status=%s
+            SET codigo=%s, tipo=%s, preco_diaria=%s
             WHERE id=%s
-        """, (quarto.codigo, quarto.tipo, quarto.preco_diaria, quarto.servicos, quarto.status, quarto.id))
+        """, (quarto.codigo, quarto.tipo, quarto.preco_diaria, quarto.id))
         conn.commit()
         cur.close()
         conn.close()
@@ -155,18 +158,12 @@ class QuartoManager:
         return [Quarto(**row) for row in rows]
 
     def get_relatorio_quartos(self):
-        """
-        Retorna relatório baseado na tabela de reservas.
-        Quartos ocupados são aqueles com reservas autorizadas ativas.
-        """
         conn = self.conn_factory()
         cur = conn.cursor()
 
-        # total de quartos
         cur.execute("SELECT COUNT(*) FROM quartos;")
         total = cur.fetchone()[0]
 
-        # quartos atualmente ocupados
         cur.execute("""
             SELECT COUNT(DISTINCT q.id)
             FROM quartos q
@@ -177,7 +174,6 @@ class QuartoManager:
 
         livres = total - ocupados
 
-        # valor total das reservas atuais
         cur.execute("""
             SELECT COALESCE(SUM(q.preco_diaria), 0)
             FROM quartos q
@@ -186,7 +182,6 @@ class QuartoManager:
         """, (date.today(), date.today()))
         valor_total = cur.fetchone()[0]
 
-        # valor médio da diária
         cur.execute("SELECT COALESCE(AVG(preco_diaria), 0) FROM quartos;")
         valor_medio = cur.fetchone()[0]
 
@@ -201,20 +196,17 @@ class QuartoManager:
             "valor_medio_diaria": valor_medio
         }
 
-# -------------------------
-# GERENCIADOR DE RESERVAS
-# -------------------------
+
 class ReservaManager:
     def __init__(self, conn_factory=get_connection):
         self.conn_factory = conn_factory
 
-    def criar_reserva(self, id_quarto: int, id_cliente: int, checkin, checkout):
-        """Cria reserva pendente (aguardando autorização)."""
+    def criar_reserva(self, id_quarto: int, id_cliente: int | None, checkin, checkout) -> int:
         conn = self.conn_factory()
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO reserva (id_quarto, id_cliente, data_checkin, data_checkout)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO reserva (id_quarto, id_cliente, data_checkin, data_checkout, autorizado)
+            VALUES (%s, %s, %s, %s, FALSE)
             RETURNING id_reserva;
         """, (id_quarto, id_cliente, checkin, checkout))
         reserva_id = cur.fetchone()[0]
@@ -230,7 +222,7 @@ class ReservaManager:
         rows = cur.fetchall()
         cur.close()
         conn.close()
-        return [Reserva(**row) for row in rows]
+        return rows
 
     def listar_reservas_cliente(self, id_cliente: int):
         conn = self.conn_factory()
@@ -239,17 +231,16 @@ class ReservaManager:
         rows = cur.fetchall()
         cur.close()
         conn.close()
-        return [Reserva(**row) for row in rows]
+        return rows
 
     def listar_pendentes(self):
-        """Reservas que ainda não foram autorizadas pelo vendedor."""
         conn = self.conn_factory()
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cur.execute("SELECT * FROM reserva WHERE autorizado=FALSE;")
         rows = cur.fetchall()
         cur.close()
         conn.close()
-        return [Reserva(**row) for row in rows]
+        return rows
 
     def autorizar_reserva(self, id_reserva: int, vendedor_id: int):
         conn = self.conn_factory()

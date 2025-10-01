@@ -18,12 +18,7 @@ CREATE TABLE IF NOT EXISTS quartos (
     codigo VARCHAR(10) NOT NULL,
     tipo VARCHAR(100) NOT NULL,
     preco_diaria NUMERIC(10,2) NOT NULL,
-    ocupado BOOLEAN DEFAULT FALSE,
-    status_quarto VARCHAR(20) NOT NULL,
-    servicos TEXT,
-    checkin DATE,
-    checkout DATE,
-    vendedor_id INT NOT NULL,
+    vendedor_id INT,
     CONSTRAINT fk_vendedor_quarto FOREIGN KEY (vendedor_id) REFERENCES vendedor(id_vendedor) ON DELETE SET NULL
 );
 

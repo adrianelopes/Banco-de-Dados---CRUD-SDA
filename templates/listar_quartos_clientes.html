@@ -30,6 +30,12 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
         <button type="submit" class="btn btn-medieval">Pesquisar</button>
     </form>
 
+    {% if request.query_params.get("erro") %}
+    <div class="alert alert-danger" style="margin-bottom: 20px;">
+        {{ request.query_params.get("erro") }}
+    </div>
+    {% endif %}
+
     <h1 class="mb-4 text-center">Quartos Disponíveis</h1>
     <div class="row">
         {% for quarto in quartos %}
@@ -44,7 +50,7 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
                     {% elif quarto.reserva_ativa %}
                         <button class="btn btn-danger btn-sm" disabled>Indisponível</button>
                     {% else %}
-                        <a href="/clientes/reservar/{{ quarto.id }}" class="btn btn-medieval btn-sm">Solicitar Reserva</a>
+                        <a href="/reservar/{{ quarto.id }}" class="btn btn-medieval btn-sm">Solicitar Reserva</a>
                     {% endif %}
                 </p>
             </div>
