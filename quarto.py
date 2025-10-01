@@ -12,7 +12,8 @@ class Quarto:
         checkin: Optional[str] = None,
         checkout: Optional[str] = None,
         servicos: Optional[str] = None,
-        vendedor_id: Optional[int] = None
+        vendedor_id: Optional[int] = None,
+        status: Optional[str] = None
     ):
         self.id = id
         self.codigo = codigo
@@ -28,6 +29,7 @@ class Quarto:
             self.preco_diaria = 0.0
 
         self.ocupado = bool(ocupado)
+        self.status = "ocupado" if ocupado else "livre"
         self.checkin = checkin
         self.checkout = checkout
         self.servicos = servicos
@@ -35,12 +37,14 @@ class Quarto:
 
     def reservar(self, checkin: str, checkout: str, servicos: str = ""):
         self.ocupado = True
+        self.status = "ocupado"
         self.checkin = checkin
         self.checkout = checkout
         self.servicos = servicos
 
     def liberar(self):
         self.ocupado = False
+        self.status = "livre"
         self.checkin = None
         self.checkout = None
         self.servicos = None

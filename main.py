@@ -245,6 +245,39 @@ def reservar_post(id: int, checkin: str = Form(...), checkout: str = Form(...), 
         manager.update(quarto)
     return RedirectResponse("/quartos", status_code=303)
 
+@app.get("/listar_quartos_cliente", response_class=HTMLResponse)
+def listar_quartos_cliente(request: Request, q: str = ""):
+    quartos = manager.get_quartos(q)
+    return templates.TemplateResponse(
+        "listar_quartos_cliente.html",
+        {"request": request, "quartos": quartos, "q": q}
+    )
+
+
+@app.post("/clientes/reservar/{id}")
+def reservar_cliente_post(
+    id: int,
+    nome_cliente: str = Form(...),
+    email_cliente: str = Form(...),
+    checkin: str = Form(...),
+    checkout: str = Form(...),
+    observacoes: str = Form("")
+):
+    # grava a solicitação no banco como 'aguardando'
+    manager.solicitar_reserva(id, checkin, checkout, observacoes)
+    
+    # redireciona para a listagem de quartos do cliente
+    return RedirectResponse("/listar_quartos_cliente", status_code=303)
+
+@app.get("/clientes/reservar/{id}", response_class=HTMLResponse)
+def reservar_page(id: int, request: Request):
+    quarto = manager.get_by_id(id)
+    if not quarto:
+        return HTMLResponse(f"<h1>Quarto {id} não encontrado</h1>", status_code=404)
+    quarto_tipo = quarto.tipo or "anao"
+    foto_url = f"/static/imagens/{quarto_tipo.lower()}.png"
+    return templates.TemplateResponse("reserva_cliente.html", {"request": request, "quarto_id": id, "quarto_tipo": quarto_tipo, "foto_url": foto_url})
+
 
 @app.get("/liberar/{id}")
 def liberar_quarto(id: int):

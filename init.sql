@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS quartos (
     tipo VARCHAR(100) NOT NULL,
     preco_diaria NUMERIC(10,2) NOT NULL,
     ocupado BOOLEAN DEFAULT FALSE,
+    status VARCHAR(20) NOT NULL,
     servicos TEXT,
     checkin DATE,
     checkout DATE,

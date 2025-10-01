@@ -98,18 +98,18 @@ class QuartoManager:
         conn.close()
         return Quarto(**row) if row else None
 
-    def add(self, codigo: str, tipo: str, preco_diaria: float, vendedor_id: int | None = None, ocupado: bool = False):
+    def add(self, codigo: str, tipo: str, preco_diaria: float, vendedor_id: int | None = None, ocupado: bool = False, status: str = "livre"):
         conn = self.conn_factory()
         cur = conn.cursor()
         if vendedor_id is None:
             cur.execute(
-                "INSERT INTO quartos (codigo, tipo, preco_diaria, ocupado) VALUES (%s, %s, %s, %s)",
-                (codigo, tipo, preco_diaria, ocupado)
+                "INSERT INTO quartos (codigo, tipo, preco_diaria, ocupado, status) VALUES (%s, %s, %s, %s, %s)",
+                (codigo, tipo, preco_diaria, ocupado, status)
             )
         else:
             cur.execute(
-                "INSERT INTO quartos (codigo, tipo, preco_diaria, ocupado, vendedor_id) VALUES (%s, %s, %s, %s, %s)",
-                (codigo, tipo, preco_diaria, ocupado, vendedor_id)
+                "INSERT INTO quartos (codigo, tipo, preco_diaria, ocupado, vendedor_id, status) VALUES (%s, %s, %s, %s, %s, %s)",
+                (codigo, tipo, preco_diaria, ocupado, vendedor_id, status)
             )
         conn.commit()
         cur.close()
@@ -216,3 +216,18 @@ class QuartoManager:
         conn.close()
         return [Quarto(**row) for row in rows]
 
+    def solicitar_reserva(self, quarto_id: int, checkin: str, checkout: str, observacoes: str):
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE quartos
+            SET status = 'aguardando',
+                checkin = %s,
+                checkout = %s,
+                servicos = %s,
+                ocupado = TRUE
+            WHERE id = %s AND status = 'livre'
+        """, (checkin, checkout, observacoes, quarto_id))
+        conn.commit()
+        cur.close()
+        conn.close()
