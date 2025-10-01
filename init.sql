@@ -1,3 +1,4 @@
+
 CREATE TABLE IF NOT EXISTS cliente (
     id_cliente SERIAL PRIMARY KEY,
     login_cliente VARCHAR(100) NOT NULL UNIQUE,
@@ -12,7 +13,6 @@ CREATE TABLE IF NOT EXISTS vendedor (
     nome_vendedor VARCHAR(200) NOT NULL
 );
 
--- Cria a tabela quartos caso não exista
 CREATE TABLE IF NOT EXISTS quartos (
     id SERIAL PRIMARY KEY,
     codigo VARCHAR(10) NOT NULL,
@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS reserva (
     autorizado BOOLEAN DEFAULT FALSE,
     autorizado_por INT,            -- vendedor que autorizou (nullable até autorizar)
     autorizado_em TIMESTAMP,       -- quando foi autorizado
+    criado_em TIMESTAMP DEFAULT NOW(),
     CONSTRAINT fk_quarto_reserva FOREIGN KEY (id_quarto) REFERENCES quartos(id) ON DELETE CASCADE,
     CONSTRAINT fk_cliente_reserva FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente) ON DELETE CASCADE,
     CONSTRAINT fk_vendedor_autorizador FOREIGN KEY (autorizado_por) REFERENCES vendedor(id_vendedor) ON DELETE SET NULL
@@ -64,4 +65,40 @@ JOIN quartos q ON r.id_quarto = q.id
 LEFT JOIN vendedor v ON r.autorizado_por = v.id_vendedor;
 
 
+-- Stored procedure para criar reserva segura
+CREATE OR REPLACE FUNCTION criar_reserva_segura(
+    p_id_quarto INT,
+    p_id_cliente INT,
+    p_checkin DATE,
+    p_checkout DATE
+)
+RETURNS INT AS $$
+DECLARE
+    conflito INT;
+    nova_reserva_id INT;
+BEGIN
+    -- Remove reservas não pagas com mais de 5 minutos
+    DELETE FROM reserva
+    WHERE id_quarto = p_id_quarto
+      AND pago = FALSE
+      AND NOW() - criado_em > INTERVAL '5 minutes';
 
+    -- Verifica conflito com reservas pagas
+    SELECT COUNT(*) INTO conflito
+    FROM reserva
+    WHERE id_quarto = p_id_quarto
+      AND (p_checkin <= data_checkout AND p_checkout >= data_checkin)
+      AND pago = TRUE;
+
+    IF conflito > 0 THEN
+        RAISE EXCEPTION 'Erro: Quarto já reservado nesse período.';
+    ELSE
+        -- Inserir reserva temporária (não paga)
+        INSERT INTO reserva (id_quarto, id_cliente, data_checkin, data_checkout, pago, autorizado, criado_em)
+        VALUES (p_id_quarto, p_id_cliente, p_checkin, p_checkout, FALSE, FALSE, NOW())
+        RETURNING id_reserva INTO nova_reserva_id;
+
+        RETURN nova_reserva_id;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;

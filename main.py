@@ -4,11 +4,18 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 import csv
+import psycopg2
 from datetime import date, datetime
-
+import asyncio
+from fastapi.responses import JSONResponse
 from database import create_tables
 from queries import QuartoManager, ReservaManager, autenticar, criar_conta, criar_conta_vendedor
 from quarto import Quarto
+from typing import Optional
+from fastapi import Request, HTTPException
+from fastapi.staticfiles import StaticFiles
+
+
 
 create_tables()
 
@@ -17,6 +24,7 @@ app = FastAPI()
 templates_dir = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=str(templates_dir))
 app.mount("/static", StaticFiles(directory=str(templates_dir)), name="static")
+
 
 manager = QuartoManager()
 reserva_manager = ReservaManager()
@@ -219,37 +227,155 @@ def reservar_page(id: int, request: Request):
 
 
 @app.post("/reservar/{id}")
-def reservar_post(id: int, checkin: str = Form(...), checkout: str = Form(...), user_id: str | None = Cookie(default=None)):
+def reservar_post(
+    id: int,
+    request: Request,
+    checkin: str = Form(...),
+    checkout: str = Form(...),
+    metodo: str = Form(...),
+    user_id: str | None = Cookie(default=None),
+):
     if not user_id:
         return RedirectResponse("/login", status_code=303)
 
     data_checkin = datetime.strptime(checkin, "%Y-%m-%d").date()
     data_checkout = datetime.strptime(checkout, "%Y-%m-%d").date()
 
-    # Buscar reservas existentes para este quarto
-    reservas = reserva_manager.listar_reservas_quarto(id)
-
-    if reservas:
-        # Verificar conflito de datas
-        conflito = any(
-            (res["data_checkin"] <= data_checkout and res["data_checkout"] >= data_checkin)
-            for res in reservas
+    try:
+        reserva_id = reserva_manager.criar_reserva(
+            id_quarto=id,
+            id_cliente=int(user_id),
+            checkin=data_checkin,
+            checkout=data_checkout
         )
+    except ValueError as e:  # Captura conflito de datas
+        # Buscar reservas existentes para mostrar bloqueios
+            quarto = manager.get_by_id(id)
+            reservas = reserva_manager.listar_reservas_quarto(id)
+            bloqueios = [
+                {
+                    "checkin": r['data_checkin'].strftime("%d/%m/%Y"),
+                    "checkout": r['data_checkout'].strftime("%d/%m/%Y")
+                }
+                for r in reservas
+            ]
+            quarto_tipo = quarto.tipo if hasattr(quarto, "tipo") else "anao"
+            foto_url = f"/static/imagens/{quarto_tipo.lower()}.png"
 
-        if conflito:
-            # Redireciona para a listagem com aviso de conflito
-            return RedirectResponse(f"/listar_quartos_cliente?erro=Data de reserva coincide com outra reserva", status_code=303)
+            return templates.TemplateResponse(
+                "reservar_quarto.html",
+                {
+                    "request": request,
+                    "quarto_id": id,
+                    "quarto_tipo": quarto_tipo,
+                    "foto_url": foto_url,
+                    "bloqueios": bloqueios,
+                    "erro": str(e)  # <-- mensagem de erro
+                }
+            )
+    except Exception as e:
+        return HTMLResponse(f"<h1>Erro ao criar reserva: {str(e)}</h1>", status_code=500)
 
-    # Se não houver conflito, cria a reserva
-    reserva_manager.criar_reserva(
-        id_quarto=id,
-        id_cliente=int(user_id),
-        checkin=data_checkin,
-        checkout=data_checkout
+    # Se conseguiu criar reserva, redireciona para página de pagamento
+    response = RedirectResponse(f"/pagamento/{reserva_id}", status_code=303)
+    response.set_cookie("metodo_pagamento", metodo)
+    return response
+
+
+
+
+@app.get("/pagamento/{reserva_id}")
+def pagamento_quarto(request: Request, reserva_id: int, metodo: Optional[str] = None):
+    reserva = reserva_manager.get_by_id(reserva_id)
+    if not reserva:
+        raise HTTPException(status_code=404, detail="Reserva não encontrada")
+    
+    # Renderiza template de pagamento já com o método selecionado
+    return templates.TemplateResponse("pagamento_quarto.html", {
+        "request": request,
+        "metodo": metodo,
+        "reserva_id": reserva["id_reserva"],
+        "quarto_codigo": reserva["id_quarto"],  # ou use o código do quarto se tiver join
+        "checkin": reserva["data_checkin"],
+        "checkout": reserva["data_checkout"],
+        "total": reserva.get("total", 0),  # você pode calcular total aqui
+        "foto_url": reserva.get("foto_url", "/static/default.jpg"),
+        "metodo": reserva.get("metodo")  # pix, cartao_credito, moeda_elfica
+    })
+
+
+
+
+    
+    
+@app.post("/reservar/{id}/pagar")
+async def pagar_reserva(id: int, request: Request, user_id: str | None = Cookie(default=None)):
+    if not user_id:
+        return JSONResponse({"sucesso": False, "erro": "Usuário não logado"})
+
+    form = await request.form()
+    reserva_id = int(form.get("reserva_id"))
+    metodo = form.get("metodo")
+
+    reserva = reserva_manager.get_by_id(reserva_id)
+    if not reserva:
+        return JSONResponse({"sucesso": False, "erro": "Reserva não encontrada"})
+
+    # Simula pagamento
+    await asyncio.sleep(1.5)
+    sucesso, erro = reserva_manager.marcar_como_pago(reserva_id, metodo)
+
+    if sucesso:
+        return RedirectResponse("/minhas_reservas", status_code=303)
+    else:
+        return JSONResponse({"sucesso": False, "erro": erro})
+
+
+# Pagamento
+
+@app.get("/pagamento/{id}", response_class=HTMLResponse)
+def pagamento_page(id: int, request: Request, checkin: str, checkout: str, user_id: str | None = Cookie(default=None)):
+    if not user_id:
+        return RedirectResponse("/login", status_code=303)
+
+    quarto = manager.get_by_id(id)
+    if not quarto:
+        return HTMLResponse(f"<h1>Quarto {id} não encontrado</h1>", status_code=404)
+
+    data_checkin = datetime.strptime(checkin, "%Y-%m-%d").date()
+    data_checkout = datetime.strptime(checkout, "%Y-%m-%d").date()
+    dias = (data_checkout - data_checkin).days
+    total = dias * quarto.preco_diaria
+
+    return templates.TemplateResponse(
+        "pagamento_quarto.html",
+        {"request": request, "quarto": quarto, "checkin": checkin, "checkout": checkout, "total": total}
     )
 
-    return RedirectResponse("/listar_quartos_cliente", status_code=303)
-    
+
+@app.post("/pagamento/{id}")
+def pagamento_post(
+    id: int,
+    checkin: str = Form(...),
+    checkout: str = Form(...),
+    metodo: str = Form(...),  # Pix, Cartão, ou Moeda Élfica
+    user_id: str | None = Cookie(default=None)
+):
+    if not user_id:
+        return RedirectResponse("/login", status_code=303)
+
+    reservas = reserva_manager.listar_reservas_cliente(int(user_id))
+    reserva = next((r for r in reversed(reservas) if not r['pago']), None)
+
+    if not reserva:
+        return HTMLResponse("<h1>Nenhuma reserva encontrada para pagar</h1>", status_code=404)
+
+    # Aqui simulamos o pagamento
+    reserva_manager.marcar_como_pago(reserva['id_reserva'], metodo)
+
+    return RedirectResponse("/minhas_reservas", status_code=303)
+
+
 
 # -----------------------
 # RELATÓRIO / DOWNLOAD

@@ -14,15 +14,17 @@ def create_tables():
     conn = get_connection()
     cur = conn.cursor()
     
+    # Tabela vendedor
     cur.execute("""
     CREATE TABLE IF NOT EXISTS vendedor (
         id_vendedor SERIAL PRIMARY KEY,
-        login VARCHAR(100) NOT NULL UNIQUE,
+        login_vendedor VARCHAR(100) NOT NULL UNIQUE,
         senha_hash VARCHAR(200) NOT NULL,
-        nome VARCHAR(200) NOT NULL
+        nome_vendedor VARCHAR(200) NOT NULL
     );
     """)
-        
+    
+    # Tabela quartos
     cur.execute("""
     CREATE TABLE IF NOT EXISTS quartos (
         id SERIAL PRIMARY KEY,
@@ -33,6 +35,8 @@ def create_tables():
         CONSTRAINT fk_vendedor_quarto FOREIGN KEY (vendedor_id) REFERENCES vendedor(id_vendedor) ON DELETE SET NULL
     );
     """)
+    
+    # Tabela cliente
     cur.execute("""
     CREATE TABLE IF NOT EXISTS cliente (
         id_cliente SERIAL PRIMARY KEY,
@@ -42,6 +46,7 @@ def create_tables():
     );
     """)
     
+    # Tabela reserva
     cur.execute("""
     CREATE TABLE IF NOT EXISTS reserva (
         id_reserva SERIAL PRIMARY KEY,
@@ -53,16 +58,18 @@ def create_tables():
         autorizado BOOLEAN DEFAULT FALSE,
         autorizado_por INT,
         autorizado_em TIMESTAMP,
+        criado_em TIMESTAMP DEFAULT NOW(),
         CONSTRAINT fk_quarto_reserva FOREIGN KEY (id_quarto) REFERENCES quartos(id) ON DELETE CASCADE,
         CONSTRAINT fk_cliente_reserva FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente) ON DELETE CASCADE,
         CONSTRAINT fk_vendedor_autorizador FOREIGN KEY (autorizado_por) REFERENCES vendedor(id_vendedor) ON DELETE SET NULL
     );
     """)
     
+    # Índices
     cur.execute("CREATE INDEX IF NOT EXISTS idx_reserva_id_quarto ON reserva(id_quarto);")
     cur.execute("CREATE INDEX IF NOT EXISTS idx_reserva_id_cliente ON reserva(id_cliente);")
 
     conn.commit()
     cur.close()
     conn.close()
-    print("Tabela 'quartos' criada ou já existente.")
+    print("Tabelas criadas ou já existentes.")

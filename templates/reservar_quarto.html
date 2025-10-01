@@ -11,7 +11,7 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
 .navbar-brand { font-size: 1.8rem; color: #f4e9dc !important; }
 .btn-medieval { background-color: #7b3f00; color: #f4e9dc; border: 1px solid #5a2e00; }
 .btn-medieval:hover { background-color: #5a2e00; color: #fff8f0; }
-input, textarea { margin: 5px 0; padding: 5px; width: 100%; }
+input, textarea, select { margin: 5px 0; padding: 5px; width: 100%; }
 h1 { color: #4b2200; }
 .reserva-container { display: flex; gap: 30px; align-items: flex-start; margin-top: 30px; }
 .quarto-imagem img { border: 12px solid #5a2e00; padding: 5px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); max-width: 350px; object-fit: cover; }
@@ -40,6 +40,14 @@ h1 { color: #4b2200; }
 
       <label>Check-out:</label>
       <input type="date" name="checkout" required>
+
+      <label>Método de pagamento:</label>
+      <select name="metodo" required>
+        <option value="pix">Pix</option>
+        <option value="cartao_credito">Cartão de Crédito</option>
+        <option value="cartao_debito">Cartão de Débito</option>
+        <option value="moeda_elfica">Moeda Élfica</option>
+      </select>
 
       <button type="submit" class="btn btn-medieval mt-2">Confirmar Reserva</button>
     </form>

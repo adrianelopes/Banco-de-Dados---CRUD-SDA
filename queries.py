@@ -201,19 +201,41 @@ class ReservaManager:
     def __init__(self, conn_factory=get_connection):
         self.conn_factory = conn_factory
 
-    def criar_reserva(self, id_quarto: int, id_cliente: int | None, checkin, checkout) -> int:
+    def criar_reserva(self, id_quarto: int, id_cliente: int, checkin, checkout) -> int:
+        """
+        Cria uma reserva segura verificando conflitos de datas.
+        Levanta ValueError se houver conflito.
+        """
         conn = self.conn_factory()
         cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO reserva (id_quarto, id_cliente, data_checkin, data_checkout, autorizado)
-            VALUES (%s, %s, %s, %s, FALSE)
-            RETURNING id_reserva;
-        """, (id_quarto, id_cliente, checkin, checkout))
-        reserva_id = cur.fetchone()[0]
-        conn.commit()
-        cur.close()
-        conn.close()
-        return reserva_id
+        try:
+            # Verificar se já existe reserva no mesmo quarto com datas que se sobrepõem
+            cur.execute("""
+                SELECT 1 FROM reserva
+                WHERE id_quarto = %s
+                AND daterange(data_checkin, data_checkout, '[]')
+                    && daterange(%s::date, %s::date, '[]')
+                LIMIT 1;
+            """, (id_quarto, checkin, checkout))
+            if cur.fetchone():
+                raise ValueError("Data de reserva coincide com outra reserva existente.")
+
+            # Criar a reserva
+            cur.execute("""
+                INSERT INTO reserva (id_quarto, id_cliente, data_checkin, data_checkout)
+                VALUES (%s, %s, %s, %s)
+                RETURNING id_reserva;
+            """, (id_quarto, id_cliente, checkin, checkout))
+            reserva_id = cur.fetchone()[0]
+            conn.commit()
+            return reserva_id
+        except Exception as e:
+            conn.rollback()
+            raise
+        finally:
+            cur.close()
+            conn.close()
+
 
     def listar_reservas_quarto(self, id_quarto: int):
         conn = self.conn_factory()
@@ -261,3 +283,29 @@ class ReservaManager:
         conn.commit()
         cur.close()
         conn.close()
+
+    def get_by_id(self, reserva_id: int):
+        conn = self.conn_factory()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute("SELECT * FROM reserva WHERE id_reserva=%s", (reserva_id,))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        return row  # Retorna um dicionário ou None
+    
+    def marcar_como_pago(self, id_reserva: int, metodo: str):
+    
+        try:
+            conn = self.conn_factory()
+            cur = conn.cursor()
+            cur.execute("""
+                UPDATE reserva
+                SET pago = TRUE
+                WHERE id_reserva = %s
+            """, (id_reserva,))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return True, None
+        except Exception as e:
+            return False, str(e)
