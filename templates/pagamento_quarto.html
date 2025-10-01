@@ -26,10 +26,12 @@ img.qrcode { display: block; margin: 20px auto; max-width: 250px; border-radius:
     <h1>Pagamento do Quarto {{ quarto_codigo }}</h1>
 
     <div class="quarto-info">
+       <img src="/imagens/qrcode.jpg" alt="QRCode" class="qrcode">
         <p><strong>Quarto:</strong> {{ quarto_codigo }}</p>
         <p><strong>Check-in:</strong> {{ checkin }}</p>
         <p><strong>Check-out:</strong> {{ checkout }}</p>
         <p><strong>Total a pagar:</strong> R$ {{ total }}</p>
+        
     </div>
 
     <form method="post" action="/reservar/{{ reserva_id }}/pagar">
@@ -48,8 +50,10 @@ img.qrcode { display: block; margin: 20px auto; max-width: 250px; border-radius:
             
             <label>CVV:</label>
             <input type="text" name="cvv" required>
+
+
         {% else %}
-            <img src="/templates/imagens/qrcode.jpg" alt="QRCode" class="qrcode">
+
 
         {% endif %}
 

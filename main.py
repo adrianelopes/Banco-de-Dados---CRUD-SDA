@@ -17,6 +17,7 @@ from fastapi.staticfiles import StaticFiles
 
 
 
+
 create_tables()
 
 app = FastAPI()
@@ -24,6 +25,8 @@ app = FastAPI()
 templates_dir = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=str(templates_dir))
 app.mount("/static", StaticFiles(directory=str(templates_dir)), name="static")
+app.mount("/imagens", StaticFiles(directory=str(templates_dir / "imagens")), name="imagens")
+app.mount("/imagens", StaticFiles(directory=templates_dir / "imagens"), name="imagens")
 
 
 manager = QuartoManager()
@@ -282,6 +285,19 @@ def reservar_post(
     return response
 
 
+
+@app.get("/cancelar_reserva/{reserva_id}")
+def cancelar_reserva(reserva_id: int, user_id: str | None = Cookie(default=None), user_type: str | None = Cookie(default=None)):
+    if not user_id or user_type != "cliente":
+        return RedirectResponse("/login", status_code=303)
+
+    reserva = reserva_manager.get_by_id(reserva_id)
+    if not reserva:
+        return HTMLResponse(f"<h1>Reserva {reserva_id} não encontrada</h1>", status_code=404)
+
+    reserva_manager.rejeitar_reserva(reserva_id)  
+
+    return RedirectResponse("/minhas_reservas", status_code=303)
 
 
 @app.get("/pagamento/{reserva_id}")
