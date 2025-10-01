@@ -86,7 +86,7 @@ def login_post(request: Request, email: str = Form(...), senha: str = Form(...))
 
 @app.get("/criar_conta", response_class=HTMLResponse)
 def criar_conta_get(request: Request, tipo: str = "cliente"):
-    return templaees.TemplateResponse("criar_conta.html", {"request": request, "error": "", "tipo": tipo})
+    return templates.TemplateResponse("criar_conta.html", {"request": request, "error": "", "tipo": tipo})
 
 
 @app.post("/criar_conta")
@@ -297,3 +297,33 @@ def minhas_reservas(request: Request, user_id: str | None = Cookie(default=None)
         "minhas_reservas.html",
         {"request": request, "reservas": reservas}
     )
+
+
+@app.get("/reservas/pendentes", response_class=HTMLResponse)
+def listar_reservas_pendentes(request: Request, user_type: str | None = Cookie(default=None), user_id: str | None = Cookie(default=None)):
+    if user_type != "vendedor" or not user_id:
+        return RedirectResponse("/login", status_code=303)
+
+    reservas = reserva_manager.listar_pendentes()  # pega todas as reservas pendentes
+
+    # exibe a página de autorizar reservas
+    return templates.TemplateResponse(
+        "autorizar_reservas.html",
+        {"request": request, "reservas": reservas}
+    )
+
+@app.get("/reservas/autorizar/{id_reserva}")
+def autorizar_reserva(id_reserva: int, user_id: str | None = Cookie(default=None), user_type: str | None = Cookie(default=None)):
+    if user_type != "vendedor" or not user_id:
+        return RedirectResponse("/login", status_code=303)
+
+    reserva_manager.autorizar_reserva(id_reserva, int(user_id))
+    return RedirectResponse("/reservas/pendentes", status_code=303)
+
+@app.get("/reservas/rejeitar/{id_reserva}")
+def rejeitar_reserva(id_reserva: int, user_type: str | None = Cookie(default=None)):
+    if user_type != "vendedor":
+        return RedirectResponse("/login", status_code=303)
+
+    reserva_manager.rejeitar_reserva(id_reserva)
+    return RedirectResponse("/reservas/pendentes", status_code=303)

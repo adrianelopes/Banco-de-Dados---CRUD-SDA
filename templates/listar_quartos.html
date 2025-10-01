@@ -74,6 +74,9 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
                         {% endif %}
                     </p>
                     <div class="d-flex justify-content-center gap-2">
+                        {% if request.cookies.get('user_type') == 'vendedor' %}
+                            <a href="/reservas/pendentes" class="btn btn-warning btn-sm">Autorizar Reservas</a>
+                        {% endif %}
                         <a href="/delete/{{ quarto.id }}" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir este quarto?');">Deletar</a>
                     </div>
                 </div>
