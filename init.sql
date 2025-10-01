@@ -1,3 +1,17 @@
+CREATE TABLE IF NOT EXISTS cliente (
+    id_cliente SERIAL PRIMARY KEY,
+    login_cliente VARCHAR(100) NOT NULL UNIQUE,
+    nome_cliente VARCHAR(200) NOT NULL,
+    senha_hash VARCHAR(200) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS vendedor (
+    id_vendedor SERIAL PRIMARY KEY,
+    login_vendedor VARCHAR(100) NOT NULL UNIQUE,
+    senha_hash VARCHAR(200) NOT NULL,
+    nome_vendedor VARCHAR(200) NOT NULL
+);
+
 -- Cria a tabela quartos caso não exista
 CREATE TABLE IF NOT EXISTS quartos (
     id SERIAL PRIMARY KEY,
@@ -11,21 +25,6 @@ CREATE TABLE IF NOT EXISTS quartos (
     checkout DATE,
     vendedor_id INT NOT NULL,
     CONSTRAINT fk_vendedor_quarto FOREIGN KEY (vendedor_id) REFERENCES vendedor(id_vendedor) ON DELETE SET NULL
-);
-
-
-CREATE TABLE IF NOT EXISTS cliente (
-    id_cliente SERIAL PRIMARY KEY,
-    login_cliente VARCHAR(100) NOT NULL UNIQUE,
-    nome_cliente VARCHAR(200) NOT NULL,
-    senha_hash VARCHAR(200) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS vendedor (
-    id_vendedor SERIAL PRIMARY KEY,
-    login VARCHAR(100) NOT NULL UNIQUE,
-    senha_hash VARCHAR(200) NOT NULL,
-    nome VARCHAR(200) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS reserva (

@@ -10,10 +10,15 @@ services:
       POSTGRES_PASSWORD: condado123
       POSTGRES_DB: ponesaltitante
     ports:
-      - "5432:5432"  # ou 5433:5432 se tiver conflito com PostgreSQL local
+      - "5432:5432"
+    # Monta o arquivo init.sql para criar o banco do zero
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # <-- arquivo de inicialização
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      # Volume temporário para não persistir dados entre reinícios
+      - db_data:/var/lib/postgresql/data
 
 volumes:
-  postgres_data:
+  db_data:
+    driver: local
+    # Declaração para que o volume seja anônimo e recriado do zero
+    # Para desenvolvimento, você pode limpar sempre com `docker-compose down -v`

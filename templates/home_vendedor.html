@@ -13,13 +13,27 @@
     .btn-medieval:hover { background-color: #5a2e00; color: #fff8f0; }
     h1 { color: #4b2200; margin-top: 20px; }
     .menu { margin-top: 50px; }
+    .user-name {
+    padding-top: 1rem;
+    color: #ffffff;        
+    font-size: 1.2rem;    
+    font-weight: bold;    
+}
 </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
         <a class="navbar-brand" href="/">Pônei Saltitante</a>
-        <a href="/logout" class="btn btn-medieval">Sair</a>
+        <div class="d-flex">
+            {% if request.cookies.get('user_name') %}
+                <span class="user-name me-3">Olá, {{ request.cookies.get('user_name') }}</span>
+                <a href="/logout" class="btn btn-medieval">Sair</a>
+            {% else %}
+                <a href="/login" class="btn btn-medieval">Login</a>
+                <a href="/criar_conta" class="btn btn-medieval ms-2">Criar Conta</a>
+            {% endif %}
+        </div>
 
     </div>
 </nav>

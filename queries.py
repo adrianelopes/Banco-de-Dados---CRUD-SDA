@@ -16,7 +16,7 @@ def autenticar(email, senha):
         return {"tipo": "cliente", "dados": cliente}
 
     # Procurar usuário nos vendedores
-    cur.execute("SELECT * FROM vendedor WHERE login=%s AND senha_hash=%s", (email, senha))
+    cur.execute("SELECT * FROM vendedor WHERE login_vendedor=%s AND senha_hash=%s", (email, senha))
     vendedor = cur.fetchone()
     if vendedor:
         cur.close()

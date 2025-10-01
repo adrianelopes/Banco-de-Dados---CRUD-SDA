@@ -70,7 +70,7 @@ def login_post(request: Request, email: str = Form(...), senha: str = Form(...))
             user_id = dados.get("id_cliente")
             redirect_target = "/home_cliente"
         else:
-            nome = dados.get("nome")
+            nome = dados.get("nome_vendedor")
             user_id = dados.get("id_vendedor")
             redirect_target = "/home_vendedor"
 
@@ -406,7 +406,7 @@ def detalhes_quarto(id: int, request: Request):
     # se quiser mostrar nome do cliente em cada reserva ativa
     for r in reservas_ativas:
         # supondo que r tenha atributo cliente_id, você pode buscar o nome do cliente
-        r.cliente_nome = r.cliente_nome if hasattr(r, "cliente_nome") else "Cliente"
+        r.cliente_nome = r.cliente_nome if hasattr(r, "nome_cliente") else "Cliente"
 
     quarto_tipo = quarto.tipo if hasattr(quarto, "tipo") else "anao"
     foto_url = f"/static/imagens/{quarto_tipo.lower()}.png"
