@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Detalhes do Quarto {{ quarto[1] }} - Pônei Saltitante</title>
+<title>Detalhes do Quarto {{ quarto.codigo }} - Pônei Saltitante</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
 <style>
@@ -13,15 +13,7 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
 .btn-medieval:hover { background-color: #5a2e00; color: #fff8f0; }
 .card { border: 2px solid #7b3f00; border-radius: 12px; background-color: #fff8f0; }
 .card-title { color: #4b2200; font-weight: bold; }
-/* Moldura medieval para a imagem */
-.quarto-imagem img {
-    border: 12px solid #5a2e00;
-    padding: 5px;
-    border-radius: 15px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    max-width: 350px;
-    object-fit: cover;
-}
+.quarto-imagem img { border: 12px solid #5a2e00; padding: 5px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); max-width: 350px; object-fit: cover; }
 </style>
 </head>
 <body>
@@ -36,48 +28,46 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
     
     <!-- Informações do quarto -->
     <div class="quarto-info" style="flex: 1; margin-right: 20px;">
-      <h2 class="card-title">Quarto {{ quarto[1] }}</h2>
-      <p><strong>Tipo:</strong> {{ quarto[2] }}</p>
-      <p><strong>Preço:</strong> R$ {{ quarto[3] }}</p>
+      <h2 class="card-title">Quarto {{ quarto.codigo }}</h2>
+      <p><strong>Tipo:</strong> {{ quarto.tipo }}</p>
+      <p><strong>Preço:</strong> R$ {{ quarto.preco_diaria }}</p>
+      
       <p>
         <strong>Status:</strong>
-        {% if quarto[4] %}
-          <span class="text-danger">Ocupado</span>
+        {% if quarto.aguardando_reserva %}
+            <span class="text-secondary">Aguardando Confirmação</span>
+        {% elif quarto.reserva_ativa %}
+            <span class="text-danger">Ocupado</span>
         {% else %}
-          <span class="text-success">Livre</span>
+            <span class="text-success">Livre</span>
         {% endif %}
       </p>
       
-      {% if quarto[4] %}
-        <p><strong>Check-in:</strong> {{ quarto[6] }}</p>
-        <p><strong>Check-out:</strong> {{ quarto[7] }}</p>
-        <p><strong>Serviços:</strong> {{ quarto[5] }}</p>
+      {% if quarto.reserva_ativa %}
+        <p><strong>Check-in:</strong> {{ quarto.checkin }}</p>
+        <p><strong>Check-out:</strong> {{ quarto.checkout }}</p>
+        <p><strong>Serviços:</strong> {{ quarto.servicos }}</p>
       {% endif %}
 
       <div class="mt-3 d-flex gap-2">
-        {% if not quarto[4] %}
-          <a href="/reservar/{{ quarto[0] }}" class="btn btn-medieval">Reservar</a>
+        {% if not quarto.reserva_ativa and not quarto.aguardando_reserva %}
+            <a href="/reservar/{{ quarto.id }}" class="btn btn-medieval">Solicitar Reserva</a>
+        {% elif quarto.reserva_ativa %}
+            <a href="/liberar/{{ quarto.id }}" class="btn btn-success">Liberar</a>
         {% else %}
-          <a href="/liberar/{{ quarto[0] }}" class="btn btn-success">Liberar</a>
+            <button class="btn btn-secondary" disabled>Aguardando Confirmação</button>
         {% endif %}
         <a href="/quartos" class="btn btn-secondary">Voltar</a>
       </div>
     </div>
 
     <div class="quarto-imagem">
-      <img src="{{ foto_url }}" alt="Foto do quarto {{ quarto_tipo }}">
+      <img src="{{ foto_url }}" alt="Foto do quarto {{ quarto.tipo }}">
     </div>
 
   </div>
 </div>
-
-
-    </div>
-  </div>
-</div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-

@@ -13,10 +13,6 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
 .btn-medieval:hover { background-color: #5a2e00; color: #fff8f0; }
 .card {border: 2px solid #7b3f00; border-radius: 12px; background-color: #fff8f0; }
 .card-title { color: #4b2200; font-weight: bold; }
-.ring { font-size: 2rem; color: goldenrod; }
-.detalhes-icon { color: #7b3f00; font-size: 1.5rem; transition: color 0.2s; }
-.detalhes-icon:hover { color: #5a2e00; text-decoration: none; }
-.main-content { padding: 20px; }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
@@ -27,9 +23,8 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
     </div>
 </nav>
 
-<div class="container mt-4 main-content">
+<div class="container mt-4">
 
-    <!-- Barra de pesquisa -->
     <form method="get" action="/listar_quartos_cliente" class="mb-3 d-flex justify-content-center">
         <input type="text" name="q" placeholder="Pesquisar por código, tipo ou valor" value="{{ q }}" class="form-control me-2" style="max-width: 400px;">
         <button type="submit" class="btn btn-medieval">Pesquisar</button>
@@ -39,18 +34,17 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
     <div class="row">
         {% for quarto in quartos %}
         <div class="col-md-4 mb-4">
-            <div class="card p-3 text-center position-relative">
+            <div class="card p-3 text-center">
                 <h5 class="card-title">Quarto {{ quarto.codigo }}</h5>
                 <p class="card-text">Tipo: {{ quarto.tipo }}</p>
                 <p class="card-text">Preço: R$ {{ quarto.preco_diaria }}</p>
                 <p class="card-text">
-                    Disponibilidade: 
-                    {% if quarto.status == "livre" %}
-                        <a href="/clientes/reservar/{{ quarto.id }}" class="btn btn-medieval btn-sm">Solicitar Reserva</a>
-                    {% elif quarto.status == "aguardando" %}
+                    {% if quarto.aguardando_reserva %}
                         <button class="btn btn-secondary btn-sm" disabled>Aguardando Confirmação</button>
-                    {% elif quarto.status == "ocupado" %}
+                    {% elif quarto.reserva_ativa %}
                         <button class="btn btn-danger btn-sm" disabled>Indisponível</button>
+                    {% else %}
+                        <a href="/clientes/reservar/{{ quarto.id }}" class="btn btn-medieval btn-sm">Solicitar Reserva</a>
                     {% endif %}
                 </p>
             </div>
@@ -60,3 +54,9 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
 
     <div class="mt-3 text-center">
         <a href="/home_cliente" class="btn btn-medieval">Voltar</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

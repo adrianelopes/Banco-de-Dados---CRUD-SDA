@@ -11,88 +11,19 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
 .navbar-brand { font-size: 1.8rem; color: #f4e9dc !important; }
 .btn-medieval { background-color: #7b3f00; color: #f4e9dc; border: 1px solid #5a2e00; }
 .btn-medieval:hover { background-color: #5a2e00; color: #fff8f0; }
-.card {position: relative; z-index: 1; border: 2px solid #7b3f00; border-radius: 12px; background-color: #fff8f0; }
+.card { position: relative; z-index: 1; border: 2px solid #7b3f00; border-radius: 12px; background-color: #fff8f0; }
 .card-title { color: #4b2200; font-weight: bold; }
-.ring { font-size: 2rem; color: goldenrod; }
-/* Barra lateral fixa */
-.sidebar {
-    position: fixed;
-    top: 69px;        
-    right: 0;             /* fixada à direita */
-    width: 200px;          /* largura estreita */
-    height: calc(100vh - 69px);         /* altura da tela */
-    background-color: #fff8f0;
-    border-left: 2px solid #5a2e00;
-    padding: 20px;
-    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
-    overflow-y: auto;
-    z-index: 2000;
-}
-
-.sidebar h5 {
-    color: #4b2200;
-    font-weight: bold;
-    margin-bottom: 15px;
-}
-
-.sidebar table td {
-    padding: 5px 10px;
-}
-
-.main-content {
-     margin-right: 220px
-    padding: 20px;
-}
-
-.sidebar {
-    position: fixed;
-    top: 69px;
-    right: 0;
-    width: 200px;
-    height: calc(100vh - 69px);
-    background-color: #fff8f0;
-    border-left: 2px solid #5a2e00;
-    padding: 20px;
-    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
-    overflow-y: auto;
-    z-index: 2000;
-}
-
-/* Conteúdo principal (desktop) */
-.main-content {
-    margin-right: 220px;  /* reserva espaço para a sidebar */
-    padding: 20px;
-}
-
-/* Ajuste para telas pequenas */
+.sidebar { position: fixed; top: 69px; right: 0; width: 200px; height: calc(100vh - 69px); background-color: #fff8f0; border-left: 2px solid #5a2e00; padding: 20px; box-shadow: -2px 0 5px rgba(0,0,0,0.1); overflow-y: auto; z-index: 2000; }
+.sidebar h5 { color: #4b2200; font-weight: bold; margin-bottom: 15px; }
+.sidebar table td { padding: 5px 10px; }
+.main-content { margin-right: 220px; padding: 20px; }
 @media (max-width: 768px) {
-    .sidebar {
-        position: static;    /* deixa de ser fixa */
-        width: 100%;         /* ocupa toda a largura */
-        height: auto;        /* altura natural */
-        border-left: none;
-        box-shadow: none;
-        margin-bottom: 20px;
-    }
-
-    .main-content {
-        margin-right: 0; /* não reserva espaço */
-    }
+    .sidebar { position: static; width: 100%; height: auto; border-left: none; box-shadow: none; margin-bottom: 20px; }
+    .main-content { margin-right: 0; }
 }
-
-/* Ícone de detalhes do quarto */
-  .detalhes-icon {
-      color: #7b3f00;       /* marrom escuro, igual botão */
-      font-size: 1.5rem;    /* tamanho adequado */
-      transition: color 0.2s;
-  }
-  .detalhes-icon:hover {
-      color: #5a2e00;       /* hover mais escuro */
-      text-decoration: none; /* tira underline se for link */
-  }
-
+.detalhes-icon { color: #7b3f00; font-size: 1.5rem; transition: color 0.2s; }
+.detalhes-icon:hover { color: #5a2e00; text-decoration: none; }
 </style>
-
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
@@ -104,22 +35,12 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
 
 <div class="container mt-4">
 
-  
 <div class="sidebar">
    <h5>Resumo de Quartos</h5>
     <table class="table table-borderless">
-        <tr>
-            <td>Total:</td>
-            <td>{{ total_quartos }}</td>
-        </tr>
-        <tr>
-            <td>Livres:</td>
-            <td>{{ quartos_livres }}</td>
-        </tr>
-        <tr>
-            <td>Ocupados:</td>
-            <td>{{ quartos_ocupados }}</td>
-        </tr>
+        <tr><td>Total:</td><td>{{ total_quartos }}</td></tr>
+        <tr><td>Livres:</td><td>{{ quartos_livres }}</td></tr>
+        <tr><td>Ocupados:</td><td>{{ quartos_ocupados }}</td></tr>
     </table>
 </div>
 
@@ -130,52 +51,31 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
     </form>
     <h1 class="mb-4">Lista de Quartos</h1>
     <div class="row">
-
         {% for quarto in quartos %}
         <div class="col-md-4 mb-4">
             <div class="card p-3">
-
-                <a href="/quarto/{{ quarto.id }}" 
-                   class="position-absolute top-0 end-0 m-2 detalhes-icon" 
-                   title="Ver detalhes">
+                <a href="/quarto/{{ quarto.id }}" class="position-absolute top-0 end-0 m-2 detalhes-icon" title="Ver detalhes">
                   <i class="bi bi-exclamation-circle-fill"></i>
                 </a>
-
-                <a href="/editar/{{ quarto.id }}" 
-                       class="position-absolute top-0 start-0 m-2 btn btn-medieval btn-sm" 
-                       title="Editar quarto">
-                       <i class="bi bi-pencil"></i>
-                    </a>
-
+                <a href="/editar/{{ quarto.id }}" class="position-absolute top-0 start-0 m-2 btn btn-medieval btn-sm" title="Editar quarto">
+                    <i class="bi bi-pencil"></i>
+                </a>
                 <div class="card-body text-center">
                     <h5 class="card-title">Quarto {{ quarto.codigo }}</h5>
                     <p class="card-text">Tipo: {{ quarto.tipo }}</p>
                     <p class="card-text">Preço: R$ {{ quarto.preco_diaria }}</p>
                     <p class="card-text">
-                        Disponibilidade: 
-                        {% if quarto.ocupado %}
+                        {% if quarto.aguardando_reserva %}
+                            <span class="text-secondary">Aguardando Confirmação</span>
+                        {% elif quarto.reserva_ativa %}
                             <span class="text-danger">Ocupado</span>
                         {% else %}
                             <span class="text-success">Livre</span>
                         {% endif %}
                     </p>
-
                     <div class="d-flex justify-content-center gap-2">
-                        {% if not quarto.ocupado %}
-                            <a href="/reservar/{{ quarto.id }}" class="btn btn-medieval btn-sm">Reservar</a>
-                        {% else %}
-                            <a href="/liberar/{{ quarto.id }}" class="btn btn-success btn-sm">Liberar</a>
-                            <div class="ring">
-                                <i class="bi bi-ring"></i>
-                            </div>
-                        {% endif %}
-
-                        <a href="/delete/{{ quarto.id }}" class="btn btn-danger btn-sm"
-                           onclick="return confirm('Tem certeza que deseja excluir este quarto?');">
-                            Deletar
-                        </a>
+                        <a href="/delete/{{ quarto.id }}" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir este quarto?');">Deletar</a>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -183,10 +83,10 @@ body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
     </div>
 </div>
 
-    <div class="mt-3">
-        <a href="/" class="btn btn-medieval">Voltar</a>
-        <a href="/add" class="btn btn-medieval">Adicionar Quarto</a>
-    </div>
+<div class="mt-3">
+    <a href="/" class="btn btn-medieval">Voltar</a>
+    <a href="/add" class="btn btn-medieval">Adicionar Quarto</a>
+</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
