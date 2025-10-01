@@ -28,12 +28,17 @@ manager = QuartoManager()
 # -----------------------
 # HOME / PÁGINAS INICIAIS
 # -----------------------
-@app.get("/", response_class=HTMLResponse)
-def home(request: Request, user_type: str | None = Cookie(default=None), user_name: str | None = Cookie(default=None)):
-    return templates.TemplateResponse(
-        "home_comum.html",
-        {"request": request, "user_name": user_name, "user_type": user_type}
-    )
+@app.get("/")
+def root(request: Request):
+    user_type = request.cookies.get("user_type")
+
+    if user_type == "vendedor":
+        return RedirectResponse("/home_vendedor", status_code=302)
+    elif user_type == "cliente":
+        return RedirectResponse("/home_cliente", status_code=302)
+    else:
+        return RedirectResponse("/home_comum", status_code=302)
+
 
 
 @app.get("/home_cliente", response_class=HTMLResponse)
@@ -45,6 +50,10 @@ def home_cliente(request: Request, user_name: str | None = Cookie(default=None))
 @app.get("/home_vendedor", response_class=HTMLResponse)
 def home_vendedor(request: Request, user_name: str | None = Cookie(default=None)):
     return templates.TemplateResponse("home_vendedor.html", {"request": request, "user_name": user_name})
+
+@app.get("/home_comum", response_class=HTMLResponse)
+def home_vendedor(request: Request, user_name: str | None = Cookie(default=None)):
+    return templates.TemplateResponse("home_comum.html", {"request": request, "user_name": user_name})
 
 
 # -----------------------
@@ -200,7 +209,7 @@ def add_quarto(
 
     manager.add(codigo, tipo, preco_diaria, vendedor_id=vendedor_id)
     # se vendedor, volta para /quartos (filtrada), senão listar para cliente
-    return RedirectResponse("/quartos" if user_type == "vendedor" else "/listar_quartos_cliente", status_code=303)
+    return RedirectResponse("/quartos" if user_type == "vendedor" else "/quartos_cliente", status_code=303)
 
 
 @app.get("/delete/{id}")
