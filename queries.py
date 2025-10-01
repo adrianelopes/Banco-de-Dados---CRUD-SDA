@@ -100,8 +100,8 @@ class QuartoManager:
             )
         else:
             cur.execute(
-                "INSERT INTO quartos (codigo, tipo, preco_diaria, vendedor_id, status) VALUES (%s, %s, %s, %s, %s)",
-                (codigo, tipo, preco_diaria, vendedor_id, status)
+                "INSERT INTO quartos (codigo, tipo, preco_diaria, vendedor_id) VALUES (%s, %s, %s, %s)",
+                (codigo, tipo, preco_diaria, vendedor_id)
             )
         conn.commit()
         cur.close()

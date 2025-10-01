@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS quartos (
     tipo VARCHAR(100) NOT NULL,
     preco_diaria NUMERIC(10,2) NOT NULL,
     ocupado BOOLEAN DEFAULT FALSE,
-    status VARCHAR(20) NOT NULL,
+    status_quarto VARCHAR(20) NOT NULL,
     servicos TEXT,
     checkin DATE,
     checkout DATE,
@@ -44,5 +44,29 @@ CREATE TABLE IF NOT EXISTS reserva (
 
 CREATE INDEX IF NOT EXISTS idx_reserva_id_quarto ON reserva(id_quarto);
 CREATE INDEX IF NOT EXISTS idx_reserva_id_cliente ON reserva(id_cliente);
+
+CREATE OR REPLACE VIEW reservas_detalhes AS
+SELECT 
+    r.id_reserva,
+    c.nome_cliente,
+    q.codigo AS codigo_quarto,
+    q.tipo AS tipo_quarto,
+    q.preco_diaria,
+    r.data_checkin,
+    r.data_checkout,
+    r.pago,
+    r.autorizado,
+    v.nome_vendedor AS autorizado_por,
+    r.autorizado_em,
+    CASE 
+        WHEN CURRENT_DATE BETWEEN r.data_checkin AND r.data_checkout 
+            THEN 'Indisponível'
+        ELSE 'Disponível'
+    END AS status_reserva
+FROM reserva r
+JOIN cliente c ON r.id_cliente = c.id_cliente
+JOIN quartos q ON r.id_quarto = q.id
+LEFT JOIN vendedor v ON r.autorizado_por = v.id_vendedor;
+
 
 
