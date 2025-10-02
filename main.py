@@ -155,11 +155,12 @@ def listar_quartos(request: Request, q: str = "", user_type: str | None = Cookie
 # Listagem de quartos para cliente
 @app.get("/listar_quartos_cliente", response_class=HTMLResponse)
 def listar_quartos_cliente(request: Request, q: str = ""):
-    quartos = manager.get_all(filtro=q)
+    quartos = manager.get_quartos_cliente(q)
     return templates.TemplateResponse(
-        "listar_quartos_clientes.html",
+        "listar_quartos_clientes.html", 
         {"request": request, "quartos": quartos, "q": q}
     )
+
 
 @app.get("/add", response_class=HTMLResponse)
 def add_page(request: Request):
@@ -194,6 +195,24 @@ def editar_quarto(id: int, codigo: str = Form(...), tipo: str = Form(...), preco
     manager.update(quarto)
     return RedirectResponse("/listar_quartos", status_code=303)
 
+@app.get("/quarto/{id}")
+def detalhes_quarto(id: int, request: Request):
+    quarto = manager.get_quarto(id)
+    if not quarto:
+        return HTMLResponse("Quarto não encontrado", status_code=404)
+    # quarto[2] é o tipo (ex: "elfo", "anao", "hobbit")
+    quarto_tipo = quarto[2] or "anao"
+    foto_url = f"/static/imagens/{quarto_tipo.lower()}.png"
+
+    return templates.TemplateResponse(
+        "quarto_detalhes.html",
+        {
+            "request": request,
+            "quarto": quarto,
+            "quarto_tipo": quarto_tipo,
+            "foto_url": foto_url
+        }
+    )
 
 # -----------------------
 # RESERVAS
@@ -397,14 +416,20 @@ def pagamento_post(
 # RELATÓRIO / DOWNLOAD
 # -----------------------
 @app.get("/relatorio", response_class=HTMLResponse)
-def relatorio(request: Request):
-    dados = manager.get_relatorio_quartos()
+def relatorio(request: Request, user_id: str | None = Cookie(default=None), user_type: str | None = Cookie(default=None)):
+    if not user_id or user_type != "vendedor":
+        return RedirectResponse("/login", status_code=303)
+
+    dados = manager.get_relatorio_quartos(int(user_id))
     return templates.TemplateResponse("relatorio.html", {"request": request, **dados})
 
 
 @app.get("/relatorio/download")
-def download_relatorio():
-    dados = manager.get_relatorio_quartos()
+def download_relatorio(request: Request, user_id: str | None = Cookie(default=None), user_type: str | None = Cookie(default=None)):
+    if not user_id or user_type != "vendedor":
+        return RedirectResponse("/login", status_code=303)
+
+    dados = manager.get_relatorio_quartos(int(user_id))
     filename = "relatorio.csv"
     with open(filename, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f, delimiter=";")

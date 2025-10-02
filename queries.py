@@ -157,32 +157,66 @@ class QuartoManager:
         conn.close()
         return [Quarto(**row) for row in rows]
 
-    def get_relatorio_quartos(self):
+    def get_quartos_cliente(self, filtro: str = ""):
+        conn = self.conn_factory()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        if filtro:
+            filtro_like = f"%{filtro}%"
+            cur.execute("""
+                SELECT q.*, v.nome_vendedor AS vendedor_nome
+                FROM quartos q
+                JOIN vendedor v ON q.vendedor_id = v.id_vendedor
+                WHERE codigo ILIKE %s OR tipo ILIKE %s OR CAST(preco_diaria AS TEXT) ILIKE %s
+                ORDER BY id;
+            """, (filtro_like, filtro_like, filtro_like))
+        else:
+            cur.execute("""
+                SELECT q.*, v.nome_vendedor AS vendedor_nome
+                FROM quartos q
+                JOIN vendedor v ON q.vendedor_id = v.id_vendedor
+                ORDER BY q.id;
+            """)
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return rows
+
+    def get_relatorio_quartos(self, vendedor_id: int):
         conn = self.conn_factory()
         cur = conn.cursor()
 
-        cur.execute("SELECT COUNT(*) FROM quartos;")
+        # total de quartos do vendedor
+        cur.execute("SELECT COUNT(*) FROM quartos WHERE vendedor_id = %s;", (vendedor_id,))
         total = cur.fetchone()[0]
 
+        # quartos ocupados do vendedor
         cur.execute("""
             SELECT COUNT(DISTINCT q.id)
             FROM quartos q
             JOIN reserva r ON q.id = r.id_quarto
-            WHERE r.autorizado = TRUE AND r.data_checkin <= %s AND r.data_checkout >= %s
-        """, (date.today(), date.today()))
+            WHERE q.vendedor_id = %s
+            AND r.autorizado = TRUE
+            AND r.data_checkin <= %s
+            AND r.data_checkout >= %s
+        """, (vendedor_id, date.today(), date.today()))
         ocupados = cur.fetchone()[0]
 
         livres = total - ocupados
 
+        # valor total das reservas ativas
         cur.execute("""
             SELECT COALESCE(SUM(q.preco_diaria), 0)
             FROM quartos q
             JOIN reserva r ON q.id = r.id_quarto
-            WHERE r.autorizado = TRUE AND r.data_checkin <= %s AND r.data_checkout >= %s
-        """, (date.today(), date.today()))
+            WHERE q.vendedor_id = %s
+            AND r.autorizado = TRUE
+            AND r.data_checkin <= %s
+            AND r.data_checkout >= %s
+        """, (vendedor_id, date.today(), date.today()))
         valor_total = cur.fetchone()[0]
 
-        cur.execute("SELECT COALESCE(AVG(preco_diaria), 0) FROM quartos;")
+        # média das diárias apenas dos quartos do vendedor
+        cur.execute("SELECT COALESCE(AVG(preco_diaria), 0) FROM quartos WHERE vendedor_id = %s;", (vendedor_id,))
         valor_medio = cur.fetchone()[0]
 
         cur.close()
