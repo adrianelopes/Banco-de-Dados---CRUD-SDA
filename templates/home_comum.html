@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Pônei Saltitante - Home</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+    body { background-color: #f4e9dc; font-family: 'MedievalSharp', cursive; }
+    .navbar { background-color: #7b3f00; }
+    .navbar-brand { font-size: 1.8rem; color: #f4e9dc !important; }
+    .btn-medieval { background-color: #7b3f00; color: #f4e9dc; border: 1px solid #5a2e00; font-size: 1.2rem; padding: 1rem 2rem; }
+    .btn-medieval:hover { background-color: #5a2e00; color: #fff8f0; }
+    h1 { color: #4b2200; margin-top: 20px; }
+    .menu { margin-top: 50px; }
+</style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Pônei Saltitante</a>
+       <div class="d-flex">
+            {% if user_name %}
+                <span style="color:#fff8f0; font-weight:bold; font-size:1.2rem; margin-right:10px;">Olá, {{ user_name }}</span>
+                <a href="/logout" class="btn btn-medieval me-2">Sair</a>
+                {% if user_type != 'vendedor' %}
+                    <a href="/criar_conta?tipo=vendedor" class="btn btn-medieval">Anunciar</a>
+                {% endif %}
+            {% else %}
+                <a href="/login" class="btn btn-medieval me-2">Login</a>
+                <a href="/criar_conta?tipo=cliente" class="btn btn-medieval me-2">Criar Conta</a>
+                <a href="/criar_conta?tipo=vendedor" class="btn btn-medieval">Anunciar</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<div class="container text-center menu">
+    <h1>Bem-vindo ao Pônei Saltitante</h1>
+    <a href="/listar_quartos_cliente" class="btn btn-medieval btn-lg mt-3">Ver Todos os Quartos</a>
+    <div class="mt-4">
+        <img src="/static/imagens/home.png" alt="Imagem da Home" class="img-fluid" style="max-width: 80%;">
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

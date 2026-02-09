@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Autorizar Reservas</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <h1>Reservas Pendentes</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Quarto</th>
+                <th>Cliente</th>
+                <th>Check-in</th>
+                <th>Check-out</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for res in reservas %}
+            <tr>
+                <td>{{ res.id_quarto }}</td>
+                <td>{{ res.id_cliente }}</td>
+                <td>{{ res.data_checkin }}</td>
+                <td>{{ res.data_checkout }}</td>
+                <td>
+                    <a href="/reservas/autorizar/{{ res.id_reserva }}" class="btn btn-success btn-sm">Autorizar</a>
+                    <a href="/reservas/rejeitar/{{ res.id_reserva }}" class="btn btn-danger btn-sm">Rejeitar</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <a href="/listar_quartos" class="btn btn-medieval">Voltar</a>
+</div>
+</body>
+</html>
